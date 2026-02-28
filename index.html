@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KarlTor - Mina Projekt</title>
+    <style>
+        /* Lite enkel och snygg styling */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+            background-color: #f6f8fa;
+        }
+        h1 {
+            border-bottom: 2px solid #eaecef;
+            padding-bottom: 10px;
+        }
+        .repo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .repo-card {
+            background: white;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+            transition: transform 0.2s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        .repo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-color: #0366d6;
+        }
+        .repo-name {
+            font-weight: bold;
+            color: #0366d6;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .repo-description {
+            font-size: 0.9em;
+            color: #586069;
+        }
+        #loader { font-style: italic; color: #666; }
+    </style>
+</head>
+<body>
+
+    <h1>Mina GitHub-projekt</h1>
+    <p>Här är en automatisk lista över mina publicerade hemsidor:</p>
+
+    <div id="loader">Hämtar projekt från GitHub...</div>
+    <div class="repo-grid" id="repo-list"></div>
+
+    <script>
+        // Inställningar
+        const username = 'karltor';
+
+        async function fetchRepos() {
+            try {
+                // Vi hämtar alla dina publika repon
+                const response = await fetch(`https://api.github.com/users/${username}/repos?sort=updated`);
+                const repos = await response.json();
+                
+                const listElement = document.getElementById('repo-list');
+                const loader = document.getElementById('loader');
+                
+                loader.style.display = 'none';
+
+                repos.forEach(repo => {
+                    // VIKTIGT: Vi visar bara repon som har "GitHub Pages" aktiverat
+                    // Och vi döljer själva root-repot (karltor.github.io) så det inte länkar till sig självt
+                    if (repo.has_pages && repo.name !== `${username}.github.io`) {
+                        
+                        const card = document.createElement('a');
+                        card.className = 'repo-card';
+                        // Skapar länken till din sida (t.ex. https://karltor.github.io/Simuleringar/)
+                        card.href = `https://${username}.github.io/${repo.name}/`;
+                        
+                        card.innerHTML = `
+                            <span class="repo-name">${repo.name}</span>
+                            <span class="repo-description">${repo.description || 'Ingen beskrivning tillgänglig.'}</span>
+                        `;
+                        
+                        listElement.appendChild(card);
+                    }
+                });
+
+                if (listElement.children.length === 0) {
+                    listElement.innerHTML = "<p>Hittade inga andra projekt med GitHub Pages aktiverat.</p>";
+                }
+
+            } catch (error) {
+                console.error("Kunde inte hämta data:", error);
+                document.getElementById('loader').innerText = "Kunde inte ladda projekten just nu.";
+            }
+        }
+
+        fetchRepos();
+    </script>
+</body>
+</html>
