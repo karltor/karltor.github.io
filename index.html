@@ -33,7 +33,10 @@
             padding: 16px;
             text-decoration: none;
             color: inherit;
-            transition: background 0.1s;
+            transition: background 0.1s, border-color 0.1s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .repo-card:hover {
@@ -45,6 +48,7 @@
             margin: 0 0 8px 0;
             font-size: 16px;
             color: #0969da;
+            word-break: break-word;
         }
 
         .repo-card p {
@@ -52,7 +56,7 @@
             font-size: 12px;
             color: #57606a;
             display: -webkit-box;
-            -webkit-line-clamp: 2;
+            -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
@@ -69,7 +73,7 @@
 <script>
     const USERNAME = 'karltor';
     
-    // BLACKLIST: Här lägger du de repon du INTE vill se på startsidan
+    // BLACKLIST: Dölj det som inte ska synas alls
     const blacklist = [
         'Lock-and-Key',
         'karltor.github.io'
@@ -84,24 +88,28 @@
             
             repoList.innerHTML = ''; 
 
-            // Filtrera med blacklist
             const filteredRepos = repos.filter(repo => !blacklist.includes(repo.name));
 
             filteredRepos.forEach(repo => {
                 const card = document.createElement('a');
                 card.className = 'repo-card';
-                card.href = repo.homepage || repo.html_url;
+                
+                // HÄR ÄR FIXEN: Vi bygger alltid Pages-länken direkt
+                card.href = `https://${USERNAME}.github.io/${repo.name}/`;
                 card.target = "_blank";
                 
                 card.innerHTML = `
-                    <h3>${repo.name}</h3>
-                    <p>${repo.description || 'Ingen beskrivning.'}</p>
+                    <div>
+                        <h3>${repo.name}</h3>
+                        <p>${repo.description || 'Interaktivt verktyg för undervisning.'}</p>
+                    </div>
                 `;
                 repoList.appendChild(card);
             });
 
         } catch (error) {
-            repoList.innerHTML = '<p>Kunde inte ladda projekt.</p>';
+            console.error('Fetch error:', error);
+            repoList.innerHTML = '<p>Kunde inte ladda projekt just nu.</p>';
         }
     }
 
