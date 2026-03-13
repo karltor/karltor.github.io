@@ -5,155 +5,104 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Karls Projekt</title>
     <style>
-        :root {
-            --bg: #f8f9fa;
-            --text: #212529;
-            --accent: #007bff;
-            --card-bg: #ffffff;
-        }
-
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: #ffffff;
+            color: #24292f;
             margin: 0;
             padding: 20px;
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
         }
 
-        header {
-            text-align: center;
-            padding: 40px 0;
-        }
+        h1 { font-size: 24px; border-bottom: 1px solid #d0d7de; padding-bottom: 10px; }
 
-        h1 { margin-bottom: 10px; }
-
-        /* Sektion för huvudportalen */
-        .featured {
-            background: linear-gradient(135deg, #007bff, #0056b3);
-            color: white;
-            padding: 30px;
-            border-radius: 15px;
-            margin-bottom: 40px;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        .featured a {
-            display: inline-block;
-            background: white;
-            color: #007bff;
-            padding: 10px 25px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-weight: bold;
-            margin-top: 15px;
-            transition: transform 0.2s;
-        }
-
-        .featured a:hover { transform: scale(1.05); }
-
-        /* Grid för övriga projekt */
         .repo-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
         }
 
         .repo-card {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 10px;
-            border-left: 5px solid var(--accent);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            transition: translateY 0.2s;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .repo-card:hover { transform: translateY(-5px); }
-
-        .repo-card h3 { margin-top: 0; font-size: 1.2rem; }
-        .repo-card p { font-size: 0.9rem; flex-grow: 1; color: #666; }
-        
-        .repo-link {
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            padding: 16px;
             text-decoration: none;
-            color: var(--accent);
-            font-weight: bold;
-            font-size: 0.9rem;
-            margin-top: 10px;
+            color: inherit;
+            transition: background 0.1s;
         }
 
-        .loading { text-align: center; font-style: italic; color: #888; }
+        .repo-card:hover {
+            background-color: #f6f8fa;
+            border-color: #0969da;
+        }
+
+        .repo-card h3 {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            color: #0969da;
+        }
+
+        .repo-card p {
+            margin: 0;
+            font-size: 12px;
+            color: #57606a;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <header>
-        <h1>Karls Digitala Klassrum</h1>
-        <p>Utforska simuleringar, spel och verktyg för undervisning.</p>
-    </header>
-
-    <section class="featured">
-        <h2>🚀 Simuleringar & Verktyg</h2>
-        <p>Här hittar du hela biblioteket med interaktiva simuleringar för Fysik, Kemi, Biologi och Matte.</p>
-        <a href="https://karltor.github.io/Simuleringar/">Öppna Portalen</a>
-    </section>
-
-    <h2>Övriga Projekt</h2>
+    <h1>Mina Projekt</h1>
     <div id="repo-list" class="repo-grid">
-        <p class="loading">Hämtar projekt från GitHub...</p>
-    </div>
+        </div>
 </div>
 
 <script>
     const USERNAME = 'karltor';
     
-    // BLACKLIST: Lägg till namnen på de repon du vill dölja här
+    // BLACKLIST: Här lägger du de repon du INTE vill se på startsidan
     const blacklist = [
-        'Lock-and-Key', 
-        'Simuleringar', 
-        'karltor.github.io' // Ofta vill man dölja själva källkods-repot för sidan
+        'Lock-and-Key',
+        'Simuleringar',
+        'karltor.github.io'
     ];
 
     async function fetchRepos() {
         const repoList = document.getElementById('repo-list');
         
         try {
-            const response = await fetch(`https://api.github.com/users/${USERNAME}/repos?sort=updated`);
+            const response = await fetch(`https://api.github.com/users/${USERNAME}/repos?sort=updated&per_page=100`);
             const repos = await response.json();
             
-            repoList.innerHTML = ''; // Rensa "Loading..."
+            repoList.innerHTML = ''; 
 
-            // Filtrera bort repon i blacklist
+            // Filtrera med blacklist
             const filteredRepos = repos.filter(repo => !blacklist.includes(repo.name));
 
             filteredRepos.forEach(repo => {
-                const card = document.createElement('div');
+                const card = document.createElement('a');
                 card.className = 'repo-card';
-                
-                // Formatera namnet lite snyggare (ersätt bindestreck med mellanslag)
-                const displayName = repo.name.replace(/-/g, ' ');
+                card.href = repo.homepage || repo.html_url;
+                card.target = "_blank";
                 
                 card.innerHTML = `
-                    <h3>${displayName}</h3>
-                    <p>${repo.description || 'Ingen beskrivning tillgänglig.'}</p>
-                    <a class="repo-link" href="${repo.homepage || repo.html_url}" target="_blank">
-                        Visa projekt →
-                    </a>
+                    <h3>${repo.name}</h3>
+                    <p>${repo.description || 'Ingen beskrivning.'}</p>
                 `;
                 repoList.appendChild(card);
             });
 
         } catch (error) {
-            console.error('Fel vid hämtning:', error);
-            repoList.innerHTML = '<p>Kunde inte ladda projekten just nu.</p>';
+            repoList.innerHTML = '<p>Kunde inte ladda projekt.</p>';
         }
     }
 
